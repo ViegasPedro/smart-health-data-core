@@ -1,0 +1,16 @@
+unisinos:
+  smart-health-data:
+    mqtt:
+      server-url: tcp://localhost:1883
+      client-id: server1
+      user: pedro
+      password: viegas@123
+
+spring:
+  application:
+    name: smart-health-data-core
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/smart-health-data-core
+    username: postgres
+    password: totvs@123
