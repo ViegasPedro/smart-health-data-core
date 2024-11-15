@@ -40,4 +40,6 @@ public class AlertMetricsService {
 		this.alertEdgeRepository.saveAll(edgeMetrics);
 	}
 
+	//TODO implementar o envio dos resultados para a proxima camada
+	
 }

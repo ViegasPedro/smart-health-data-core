@@ -36,4 +36,6 @@ public class VitalSignMetricsService {
 	public void processUserMetricMessage(VitalSignUserMetricsMessage message) {
 		userMetricsRepository.save(userConverter.convert(message));
 	}
+	
+	//TODO implementar o envio dos resultados para a proxima camada
 }

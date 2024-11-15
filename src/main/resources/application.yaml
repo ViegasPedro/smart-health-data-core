@@ -4,7 +4,7 @@ unisinos:
       server-url: tcp://localhost:1883
       client-id: corenode1
       user: pedro
-      password: mypassword@123
+      password: viegas@123
 
 spring:
   application:
@@ -13,4 +13,4 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/smart-health-data
     username: postgres
-    password: mypassword@123
+    password: totvs@123
