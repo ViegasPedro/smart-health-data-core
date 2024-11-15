@@ -8,8 +8,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.stereotype.Component;
 
-import com.unisinos.smart_health_data_core.alert.mqtt.AlertSubscriber;
+import com.unisinos.smart_health_data_core.alert.metrics.mqtt.AlertMetricsSubscriber;
 import com.unisinos.smart_health_data_core.commons.SmartHealthDataProperties;
+import com.unisinos.smart_health_data_core.vital_sign.metrics.mqtt.VitalSignMetricsSubscriber;
 import com.unisinos.smart_health_data_core.vital_sign.mqtt.VitalSignSubscriber;
 
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class MqttClient {
 
 	private final SmartHealthDataProperties properties;
-	private final AlertSubscriber alertSubscriber;
+	private final AlertMetricsSubscriber alertMetricsSubscriber;
 	private final VitalSignSubscriber vitalSignSubscriber;
+	private final VitalSignMetricsSubscriber vitalSignMetricsSubscriber;
 
 	private MqttAsyncClient client = null;
 
@@ -43,9 +45,13 @@ public class MqttClient {
 	            @Override
 	            public void onSuccess(IMqttToken asyncActionToken) {
 	                try {
-	                    String[] topics = {MqttTopicUtils.ALERT_TOPIC, MqttTopicUtils.VITAL_SIGN_TOPIC};
-	                    int[] qos = {1, 1};
-	                    IMqttMessageListener[] listeners = {alertSubscriber, vitalSignSubscriber};
+	                    String[] topics = {MqttTopicUtils.ALERT_METRICS_TOPIC, MqttTopicUtils.ALERT_EDGE_METRICS_TOPIC, 
+	                    		MqttTopicUtils.VITAL_SIGN_TOPIC,  MqttTopicUtils.VITAL_SIGN_PROCESSED_TOPIC,
+	                    		MqttTopicUtils.VITAL_SIGN_COUNT_METRICS_TOPIC, MqttTopicUtils.VITAL_SIGN_EDGE_METRICS_TOPIC, MqttTopicUtils.VITAL_SIGN_USER_METRICS_TOPIC};
+	                    int[] qos = {1, 1, 1, 1, 1, 1, 1};
+	                    IMqttMessageListener[] listeners = {alertMetricsSubscriber, alertMetricsSubscriber, 
+	                    		vitalSignSubscriber, vitalSignSubscriber,
+	                    		vitalSignMetricsSubscriber, vitalSignMetricsSubscriber, vitalSignMetricsSubscriber};
 	
 	                    client.subscribe(topics, qos, listeners);
 	
