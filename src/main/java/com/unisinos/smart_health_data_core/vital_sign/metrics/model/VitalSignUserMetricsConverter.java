@@ -25,5 +25,19 @@ public class VitalSignUserMetricsConverter implements Converter<VitalSignUserMet
 		metrics.setRegisteredAt(source.getRegisteredAt());
 		return metrics;
 	}
+	
+	public VitalSignUserMetricsMessage convertToMessage(VitalSignUserMetrics source) {
+		VitalSignUserMetricsMessage message = new VitalSignUserMetricsMessage();
+		message.setCovidElderly(source.getCovidElderly());
+		message.setCovidFemale(source.getCovidFemale());
+		message.setCovidMale(source.getCovidMale());
+		message.setCovidTotal(source.getCovidTotal());
+		message.setPneumoniaElderly(source.getPneumoniaElderly());
+		message.setPneumoniaFemale(source.getPneumoniaFemale());
+		message.setPneumoniaMale(source.getPneumoniaMale());
+		message.setPneumoniaTotal(source.getPneumoniaTotal());
+		message.setRegisteredAt(source.getRegisteredAt());
+		return message;
+	}
 
 }

@@ -1,5 +1,12 @@
 unisinos:
   smart-health-data:
+    parent:
+      is-cloud: true
+      mqtt:
+        server-url: tcp://1231232131:1883
+        client-id: corenode2
+        user: pedro
+        password: viegas@123
     mqtt:
       server-url: tcp://localhost:1883
       client-id: corenode1
@@ -12,5 +19,5 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/smart-health-data
-    username: postgres
-    password: totvs@123
+    username: pedro
+    password: viegas@123

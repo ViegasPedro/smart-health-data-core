@@ -1,7 +1,5 @@
 package com.unisinos.smart_health_data_core.vital_sign.metrics.service;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,53 +11,44 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.unisinos.smart_health_data_core.edge.model.Edge;
-import com.unisinos.smart_health_data_core.patient.model.Gender;
 import com.unisinos.smart_health_data_core.vital_sign.metrics.model.VitalSignCountMetrics;
-import com.unisinos.smart_health_data_core.vital_sign.metrics.model.VitalSignCountMetricsRepository;
 import com.unisinos.smart_health_data_core.vital_sign.metrics.model.VitalSignEdgeMetrics;
-import com.unisinos.smart_health_data_core.vital_sign.metrics.model.VitalSignEdgeMetricsRepository;
 import com.unisinos.smart_health_data_core.vital_sign.metrics.model.VitalSignUserMetrics;
-import com.unisinos.smart_health_data_core.vital_sign.metrics.model.VitalSignUserMetricsRepository;
-import com.unisinos.smart_health_data_core.vital_sign.model.UserVitalSignAggregateRepository;
 import com.unisinos.smart_health_data_core.vital_sign.model.VitalSign;
 import com.unisinos.smart_health_data_core.vital_sign.model.VitalSignType;
 import com.unisinos.smart_health_data_core.vital_sign.service.VitalSignService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class VitalSignJobService {
 
 	private final VitalSignService vitalSignService;
-	private final VitalSignCountMetricsRepository countMetricsRepository;
-	private final VitalSignUserMetricsRepository userMetricsRepository;
-	private final VitalSignEdgeMetricsRepository edgeMetricsRepository;
-	private final UserVitalSignAggregateRepository userAggregateRepository;
+	private final VitalSignMetricsService vitalSignMetricsService;
 			
 	@Scheduled(cron = "*/5 * * * * *")
 	@Transactional
 	public void createMetrics() {
-		log.info("Starting vital sign job");
 		List<VitalSign> vitalSigns = vitalSignService.getAll();
+		List<VitalSignCountMetrics> countMetrics = null;
+		List<VitalSignEdgeMetrics> edgeMetrics = null;
+		
 		if (!vitalSigns.isEmpty()) {
-			List<VitalSignCountMetrics> countMetrics = generateVitalSignCountMetrics(vitalSigns);
-			this.countMetricsRepository.saveAll(countMetrics);
+			countMetrics = generateVitalSignCountMetrics(vitalSigns);
+			this.vitalSignMetricsService.saveAllcountMetrics(countMetrics);
 			
-			List<VitalSignEdgeMetrics> edgeMetrics = generateVitalSignEdgeMetrics(vitalSigns);
-			this.edgeMetricsRepository.saveAll(edgeMetrics);
+			edgeMetrics = generateVitalSignEdgeMetrics(vitalSigns);
+			this.vitalSignMetricsService.saveAllEdgeMetrics(edgeMetrics);
 			
 			Date lastSignDate = vitalSigns.get(vitalSigns.size() - 1).getDate();
 			this.vitalSignService.deleteAllProcessed(lastSignDate);
 		}
 		
 		VitalSignUserMetrics userMetrics = generateVitalSignUserMetrics();
-		this.userMetricsRepository.save(userMetrics);
-		
-		log.info("Finished vital sign job");
+		this.vitalSignMetricsService.saveUserMetrics(userMetrics);
+		this.vitalSignMetricsService.sendResultToParent(countMetrics, edgeMetrics, userMetrics);
 	}
 	
 	private List<VitalSignCountMetrics> generateVitalSignCountMetrics(List<VitalSign> vitalSigns) {
@@ -86,19 +75,16 @@ public class VitalSignJobService {
 		VitalSignUserMetrics userMetrics = new VitalSignUserMetrics();
 		userMetrics.setId(UUID.randomUUID().toString());
 		userMetrics.setRegisteredAt(new Date());
+				
+		userMetrics.setCovidTotal(vitalSignMetricsService.countTotalCovid());
+		userMetrics.setCovidFemale(vitalSignMetricsService.countCovidFemale());
+		userMetrics.setCovidMale(vitalSignMetricsService.countCovidMale());
+		userMetrics.setCovidElderly(vitalSignMetricsService.countCovidElderly());
 		
-		LocalDate localDate = LocalDate.now().minusYears(65);
-		Date elderlyDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-		
-		userMetrics.setCovidTotal(userAggregateRepository.countTotalCovid());
-		userMetrics.setCovidFemale(userAggregateRepository.countCovidByGender(Gender.FEMALE));
-		userMetrics.setCovidMale(userAggregateRepository.countCovidByGender(Gender.MALE));
-		userMetrics.setCovidElderly(userAggregateRepository.countCovidElderly(elderlyDate));
-		
-		userMetrics.setPneumoniaTotal(userAggregateRepository.countTotalPneumonia());
-		userMetrics.setPneumoniaFemale(userAggregateRepository.countPneumoniaByGender(Gender.FEMALE));
-		userMetrics.setPneumoniaMale(userAggregateRepository.countPneumoniaByGender(Gender.MALE));
-		userMetrics.setPneumoniaElderly(userAggregateRepository.countPneumoniaElderly(elderlyDate));
+		userMetrics.setPneumoniaTotal(vitalSignMetricsService.countTotalPneumonia());
+		userMetrics.setPneumoniaFemale(vitalSignMetricsService.countPneumoniaFemale());
+		userMetrics.setPneumoniaMale(vitalSignMetricsService.countPneumoniaMale());
+		userMetrics.setPneumoniaElderly(vitalSignMetricsService.countPneumoniaElderly());
 		
 		return userMetrics;
 	}

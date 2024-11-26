@@ -11,6 +11,7 @@ import lombok.Setter;
 public class SmartHealthDataProperties {
 
 	private Mqtt mqtt;
+	private Parent parent;
 	
 	@Getter
 	@Setter
@@ -19,6 +20,13 @@ public class SmartHealthDataProperties {
 		private String clientId;
 		private String user;
 		private String password;
+	}
+	
+	@Getter
+	@Setter
+	public static class Parent {
+		private Mqtt mqtt;
+		private Boolean isCloud;
 	}
 	
 }

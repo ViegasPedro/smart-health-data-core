@@ -25,11 +25,18 @@ public class MqttClient {
 	private final VitalSignMetricsSubscriber vitalSignMetricsSubscriber;
 
 	private MqttAsyncClient client = null;
-
+	private MqttAsyncClient parentClient = null;
+	
 	public MqttAsyncClient getClient() {
 		if (client == null)
 			connect();
 		return client;
+	}
+	
+	public MqttAsyncClient getParentClient() {
+		if (parentClient == null)
+			connectToParent();
+		return parentClient;
 	}
 
 	private void connect() {        
@@ -65,6 +72,22 @@ public class MqttClient {
 	                System.err.println("Error connecting to MQTT broker: " + exception.getMessage());
 	            }
 	        });
+	        this.client = client;
+        } catch(Exception e) {
+        	e.printStackTrace();
+        }
+	}
+	
+	private void connectToParent() {        
+    	MqttConnectOptions options = new MqttConnectOptions();
+    	options.setUserName(this.properties.getParent().getMqtt().getUser());
+        options.setPassword(this.properties.getParent().getMqtt().getPassword().toCharArray());
+        options.setCleanSession(true);
+        options.setKeepAliveInterval(30);
+        
+        try {
+        	MqttAsyncClient client = new MqttAsyncClient(this.properties.getParent().getMqtt().getServerUrl(), this.properties.getParent().getMqtt().getClientId());
+	        client.connect(options);
 	        this.client = client;
         } catch(Exception e) {
         	e.printStackTrace();

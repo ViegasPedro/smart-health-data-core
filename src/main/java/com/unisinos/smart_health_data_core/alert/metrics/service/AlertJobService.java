@@ -43,6 +43,7 @@ public class AlertJobService {
 	        
 	        Date lastAlertDate = alerts.get(alerts.size() - 1).getDate();
 			this.alertService.deleteAllProcessed(lastAlertDate);
+			this.alertMetricsService.sendResultsToParent(metrics, edgeMetrics);
 		}
 	}
 	

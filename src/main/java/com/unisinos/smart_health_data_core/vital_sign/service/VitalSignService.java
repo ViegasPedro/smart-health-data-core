@@ -8,6 +8,8 @@ import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.unisinos.smart_health_data_core.commons.mqtt.MqttPublisher;
+import com.unisinos.smart_health_data_core.commons.mqtt.MqttTopicUtils;
 import com.unisinos.smart_health_data_core.patient.model.Patient;
 import com.unisinos.smart_health_data_core.vital_sign.model.UserVitalSignAggregate;
 import com.unisinos.smart_health_data_core.vital_sign.model.UserVitalSignAggregateRepository;
@@ -24,6 +26,7 @@ public class VitalSignService {
 
 	private final VitalSignRepository repository;
 	private final UserVitalSignAggregateRepository aggregateRepository;
+	private final MqttPublisher publisher;
 	
 	public void processMessage(VitalSign vitalSign) {
 		this.saveVitalSign(vitalSign);
@@ -32,8 +35,12 @@ public class VitalSignService {
 	}
 	
 	public void sendToNextLayer(VitalSign vitalSign) {
-		//here vital sign can be sent to the next layer of fog or the cloud
-		log.info("Vital Sign sent to next layer of fog or cloud");
+		try {
+			publisher.publishToParent(MqttTopicUtils.VITAL_SIGN_PROCESSED_TOPIC, vitalSign);
+			log.info("Vital Sign sent to next layer.");
+		} catch (Exception e) {
+			log.error("Error sending message to next layer. {}", e);
+		}
 	}
 		
 	public List<VitalSign> getAll() {

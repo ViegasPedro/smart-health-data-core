@@ -21,5 +21,15 @@ public class AlertMetricsConverter implements Converter<AlertMetricsMessage, Ale
 		metrics.setUsers(source.getUsers());
 		return metrics;
 	}
+	
+	public AlertMetricsMessage convertToMessage(AlertMetrics source) {
+		AlertMetricsMessage message = new AlertMetricsMessage();
+		message.setMultiVitalSign(source.getMultiVitalSign());
+		message.setRegisteredAt(source.getRegisteredAt());
+		message.setSingleVitalSign(source.getSingleVitalSign());
+		message.setTotal(source.getTotal());
+		message.setUsers(source.getUsers());
+		return message;
+	}
 
 }
