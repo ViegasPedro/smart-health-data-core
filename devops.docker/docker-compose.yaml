@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    hostname: mosquitto
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - /home/pedroviegas/Pedro/unisinos/tcc2/mosquitto:/etc/mosquitto
+      - /home/pedroviegas/Pedro/unisinos/tcc2/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+  
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    volumes:
+      - grafana_test_data:/var/lib/grafana
+    ports:
+      - 3000:3000
+      
+  postgres1:
+    image: sameersbn/postgresql:10-1
+    environment:
+      DB_NAME: smart-health-data
+      PG_PASSWORD: viegas@123
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  
+      
+volumes:
+  grafana_test_data:
+  postgres_data:
